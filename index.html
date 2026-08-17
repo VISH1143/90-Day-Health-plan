@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#163A5F">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<title>90-Day Routine</title>
+<style>
+:root{--navy:#163A5F;--blue:#2F6B9A;--bg:#F4F7FA;--card:#fff;--text:#17212B;--muted:#66727E;--green:#198754;--red:#C0392B;--gold:#D89B16;--border:#DCE3EA}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);padding-bottom:82px}
+header{background:linear-gradient(135deg,var(--navy),var(--blue));color:white;padding:20px 16px 18px;position:sticky;top:0;z-index:5}
+.headerrow{display:flex;justify-content:space-between;align-items:center;gap:10px}.title{font-size:22px;font-weight:800}.sub{opacity:.85;font-size:13px;margin-top:3px}
+.container{max-width:760px;margin:auto;padding:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px;text-align:center}.stat b{display:block;font-size:22px}.stat span{font-size:11px;color:var(--muted)}
+.progress{height:10px;background:#E4EAF0;border-radius:99px;overflow:hidden}.progress>div{height:100%;background:var(--green);width:0%;transition:.2s}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;margin:12px 0;overflow:hidden;box-shadow:0 2px 8px #00000008}
+.card h2{font-size:16px;margin:0;padding:14px;border-bottom:1px solid var(--border)}
+.habit{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid #EEF1F4}.habit:last-child{border-bottom:0}
+.check{width:31px;height:31px;border:2px solid #B8C3CD;border-radius:9px;background:white;flex:none;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.habit.done .check{background:var(--green);border-color:var(--green);color:white}.habit.done .name{text-decoration:line-through;color:var(--muted)}
+.time{font-size:11px;color:var(--muted);min-width:63px}.name{font-size:14px;font-weight:650;flex:1}.miss{font-size:11px;color:var(--red)}
+button,.select{border:1px solid var(--border);background:white;border-radius:10px;padding:9px 11px;font:inherit;cursor:pointer}
+.primary{background:var(--navy);color:white;border-color:var(--navy)}.danger{color:var(--red)}
+nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--border);display:flex;justify-content:center;gap:4px;padding:8px;z-index:10}
+nav button{flex:1;max-width:180px;border:0;background:white;color:var(--muted)}nav button.active{color:var(--navy);font-weight:800}
+.tab{display:none}.tab.active{display:block}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.day{padding:8px 2px;text-align:center;border-radius:8px;background:#EEF2F5;font-size:11px}.day.good{background:#C6EFCE;color:#135C32}.day.ok{background:#FFEB9C}.day.bad{background:#FFC7CE;color:#7D1717}.day.today{outline:2px solid var(--navy)}
+.small{font-size:12px;color:var(--muted);line-height:1.45}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}.settingsrow{padding:12px 0;border-bottom:1px solid var(--border)}
+input[type=date]{padding:9px;border:1px solid var(--border);border-radius:9px;font:inherit}
+textarea{width:100%;min-height:80px;border:1px solid var(--border);border-radius:10px;padding:10px;font:inherit}
+@media(max-width:430px){.stats{grid-template-columns:repeat(3,1fr)}.stat b{font-size:19px}.time{min-width:52px;font-size:10px}.name{font-size:13px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="headerrow"><div><div class="title">90-Day Routine</div><div class="sub" id="dayLabel">Day 1 of 90</div></div><button id="todayBtn">Today</button></div>
+</header>
+<main class="container">
+<section id="dashboard" class="tab active">
+ <div class="stats">
+  <div class="stat"><b id="score">0%</b><span>Today</span></div>
+  <div class="stat"><b id="streak">0</b><span>Current streak</span></div>
+  <div class="stat"><b id="perfect">0</b><span>Perfect days</span></div>
+ </div>
+ <div class="progress"><div id="bar"></div></div>
+ <p class="small" id="progressText">0 of 90 days completed</p>
+
+ <div class="card"><h2>🌅 Morning</h2><div id="morning"></div></div>
+ <div class="card"><h2>💼 Day / Work</h2><div id="daytime"></div></div>
+ <div class="card"><h2>🌙 Evening</h2><div id="evening"></div></div>
+
+ <div class="card">
+  <h2>📝 Daily reflection</h2>
+  <div style="padding:14px"><textarea id="notes" placeholder="What went well? What did you miss? What will you improve tomorrow?"></textarea></div>
+ </div>
+</section>
+
+<section id="history" class="tab">
+ <div class="card"><h2>📊 90-Day History</h2><div style="padding:14px">
+  <div class="row"><span class="small">Green ≥ 80% · Yellow 50–79% · Red &lt; 50%</span><b id="overall">0%</b></div>
+  <div class="calendar" id="calendar" style="margin-top:12px"></div>
+ </div></div>
+ <div class="card"><h2>🏆 Progress</h2><div style="padding:14px" class="small" id="details"></div></div>
+</section>
+
+<section id="settings" class="tab">
+ <div class="card"><h2>⚙️ Challenge settings</h2><div style="padding:14px">
+  <div class="settingsrow"><div class="row"><div><b>Start date</b><div class="small">Day 1 begins on this date.</div></div><input id="startDate" type="date"></div></div>
+  <div class="settingsrow"><b>90-day target</b><div class="small">Aim for ≥80% every day; 100% is the ideal.</div></div>
+  <div class="settingsrow"><button class="primary" id="installBtn" style="display:none">Install app</button></div>
+  <div class="settingsrow"><button class="danger" id="resetBtn">Reset all tracking data</button></div>
+ </div></div>
+ <div class="card"><h2>📱 Mobile use</h2><div style="padding:14px" class="small">For the best Android experience, open this app in Chrome after hosting it on HTTPS, then use the browser menu → Add to Home screen / Install app. A PWA can behave like a standalone app on Android.</div></div>
+</section>
+</main>
+
+<nav>
+ <button class="active" data-tab="dashboard">Today</button>
+ <button data-tab="history">History</button>
+ <button data-tab="settings">Settings</button>
+</nav>
+
+<script>
+const habits=[
+ {id:"wake",time:"5:30 AM",name:"Wake up",group:"morning"},
+ {id:"walk1",time:"6:00 AM",name:"Walking / Gym",group:"morning"},
+ {id:"home1",time:"7:30 AM",name:"Return home",group:"morning"},
+ {id:"school",time:"8:00 AM",name:"Drop Advait to school van",group:"daytime"},
+ {id:"breakfast",time:"8:05 AM",name:"Breakfast",group:"daytime"},
+ {id:"office",time:"8:30 AM",name:"Leave for office",group:"daytime"},
+ {id:"home2",time:"6:30 PM",name:"Return home",group:"evening"},
+ {id:"dinner",time:"7:00 PM",name:"Dinner",group:"evening"},
+ {id:"walk2",time:"8:00 PM",name:"Walking / Gym",group:"evening"},
+ {id:"home3",time:"9:30 PM",name:"Return home",group:"evening"},
+ {id:"bath",time:"9:30 PM",name:"Freshen up / Bath",group:"evening"},
+ {id:"speech",time:"Evening",name:"Talk / Practice speech",group:"evening"},
+ {id:"sleep",time:"10:30 PM",name:"Sleep on time",group:"evening"}
+];
+const KEY="routine90_v1";
+let data=JSON.parse(localStorage.getItem(KEY)||"null")||{start: new Date().toISOString().slice(0,10), logs:{}, notes:{}};
+let selectedDate=new Date().toISOString().slice(0,10);
+let deferredPrompt=null;
+
+function save(){localStorage.setItem(KEY,JSON.stringify(data))}
+function dayIndex(date){
+ const a=new Date(data.start+"T00:00:00"), b=new Date(date+"T00:00:00");
+ return Math.floor((b-a)/86400000)+1;
+}
+function iso(d){return d.toISOString().slice(0,10)}
+function getLog(date){return data.logs[date]||{}}
+function pct(date){const l=getLog(date);return Math.round(habits.filter(h=>l[h.id]).length/habits.length*100)}
+function render(){
+ const idx=dayIndex(selectedDate); document.getElementById("dayLabel").textContent=`Day ${Math.max(1,Math.min(90,idx))} of 90`;
+ const l=getLog(selectedDate);
+ ["morning","daytime","evening"].forEach(g=>{
+   document.getElementById(g).innerHTML=habits.filter(h=>h.group===g).map(h=>`
+    <div class="habit ${l[h.id]?"done":""}">
+      <button class="check" aria-label="${h.name}" onclick="toggle('${h.id}')">${l[h.id]?"✓":""}</button>
+      <span class="time">${h.time}</span><span class="name">${h.name}</span>
+    </div>`).join("");
+ });
+ document.getElementById("notes").value=data.notes[selectedDate]||"";
+ const p=pct(selectedDate);document.getElementById("score").textContent=p+"%";document.getElementById("bar").style.width=p+"%";
+ const completedDays=Array.from({length:90},(_,i)=>iso(new Date(new Date(data.start+"T00:00:00").getTime()+i*86400000))).filter(d=>pct(d)>=80).length;
+ document.getElementById("progressText").textContent=`${Math.min(90,Math.max(0,dayIndex(selectedDate)))} of 90 days reached · ${completedDays} days ≥80%`;
+ document.getElementById("streak").textContent=streak();
+ document.getElementById("perfect").textContent=perfectDays();
+ renderHistory();
+}
+function toggle(id){const l=getLog(selectedDate);l[id]=!l[id];data.logs[selectedDate]=l;save();render()}
+function streak(){
+ let s=0, d=new Date();
+ for(let i=0;i<90;i++){let ds=iso(d);if(dayIndex(ds)<1)break;if(pct(ds)>=80)s++;else break;d.setDate(d.getDate()-1)}
+ return s;
+}
+function perfectDays(){let n=0;for(let i=0;i<90;i++){let d=new Date(data.start+"T00:00:00");d.setDate(d.getDate()+i);if(pct(iso(d))===100)n++}return n}
+function renderHistory(){
+ const cal=document.getElementById("calendar");cal.innerHTML="";
+ let sum=0,count=0,good=0;
+ for(let i=0;i<90;i++){
+  let d=new Date(data.start+"T00:00:00");d.setDate(d.getDate()+i);let ds=iso(d),p=pct(ds);sum+=p;count++;
+  if(p>=80)good++;
+  let cls=p>=80?"good":p>=50?"ok":p>0?"bad":"";
+  cal.innerHTML+=`<button class="day ${cls} ${ds===selectedDate?"today":""}" onclick="selectDate('${ds}')">D${i+1}<br><b>${p}%</b></button>`;
+ }
+ let overall=Math.round(sum/count);document.getElementById("overall").textContent=overall+"%";
+ document.getElementById("details").innerHTML=`<b>${good}</b> / 90 days at ≥80%<br><b>${perfectDays()}</b> perfect days (100%)<br><b>${90-good}</b> days below 80% or not yet completed.<br><br><b>Rule:</b> If you miss one activity, continue the rest of the routine. Never abandon the day.`;
+}
+function selectDate(ds){selectedDate=ds;document.querySelector('[data-tab="dashboard"]').click();render()}
+document.getElementById("todayBtn").onclick=()=>{selectedDate=new Date().toISOString().slice(0,10);render()};
+document.getElementById("notes").addEventListener("input",e=>{data.notes[selectedDate]=e.target.value;save()});
+document.getElementById("startDate").value=data.start;
+document.getElementById("startDate").addEventListener("change",e=>{if(e.target.value){data.start=e.target.value;save();selectedDate=e.target.value;render()}});
+document.getElementById("resetBtn").onclick=()=>{if(confirm("Reset all 90-day tracking data?")){data={start:new Date().toISOString().slice(0,10),logs:{},notes:{}};save();selectedDate=data.start;document.getElementById("startDate").value=data.start;render()}};
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.getElementById(b.dataset.tab).classList.add("active")});
+
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;document.getElementById("installBtn").style.display="block"});
+document.getElementById("installBtn").onclick=async()=>{if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null}};
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+render();
+</script>
+</body>
+</html>

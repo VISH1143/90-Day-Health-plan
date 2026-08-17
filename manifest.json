@@ -1,0 +1,17 @@
+{
+  "name": "90-Day Routine",
+  "short_name": "90-Day Routine",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F4F7FA",
+  "theme_color": "#163A5F",
+  "description": "Personal 90-day daily consistency tracker.",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
